@@ -1,0 +1,40 @@
+services:
+  app:
+    container_name: micro-user
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    depends_on:
+      - mongodb
+
+  # MongoDB
+  mongodb:
+    # This image automatically creates a replica set required for transactions
+    image: prismagraphql/mongo-single-replica:4.4.3-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      INIT_WAIT_SEC: 3
+    ports:
+      - 27017:27017
+
+  # Redis
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data 
+
+volumes:
+  redis:
+    driver: local
